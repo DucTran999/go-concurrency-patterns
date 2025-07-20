@@ -1,10 +1,15 @@
 package workerpool
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"strings"
 	"time"
+)
+
+var (
+	ErrInvalidIP = errors.New("invalid IP")
 )
 
 type Job struct {
@@ -24,7 +29,7 @@ func (j *Job) Run() error {
 	time.Sleep(time.Millisecond * 200)
 
 	if len(j.record) == 6 && !isIPv4(j.record[5]) {
-		return fmt.Errorf("record %d: invalid IP", j.ID)
+		return fmt.Errorf("record %d: %w", j.ID, ErrInvalidIP)
 	}
 
 	return nil
