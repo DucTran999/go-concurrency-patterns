@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	s := time.Now()
 
 	path, err := testutil.BuildFilePath("test/datatest/mock_data.csv")

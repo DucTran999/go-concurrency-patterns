@@ -16,7 +16,7 @@ func BuildFilePath(fileName string) (string, error) {
 	// Get the current working directory
 	dir, err := os.Getwd()
 	if err != nil {
-		return "", fmt.Errorf("error getting current working directory: %w", err)
+		return "", fmt.Errorf("error getting current working directory: %w", err) //nolint
 	}
 
 	for {
@@ -32,5 +32,5 @@ func BuildFilePath(fileName string) (string, error) {
 		dir = parentDir
 	}
 
-	return "", errors.New("go.mod not found")
+	return "", errors.New("go.mod not found") //nolint
 }
