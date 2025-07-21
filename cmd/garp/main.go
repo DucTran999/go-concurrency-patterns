@@ -2,7 +2,6 @@ package garp
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os/signal"
 	"syscall"
@@ -55,9 +54,9 @@ func GoNetSim() {
 	}
 
 	// Register devices with the switch
-	var unicasts []garp.UnicastChan
-	for _, dev := range devices {
-		unicasts = append(unicasts, dev.Unicast())
+	unicasts := make([]garp.UnicastChan, len(devices))
+	for i, dev := range devices {
+		unicasts[i] = dev.Unicast()
 	}
 	switchDevice.RegisterDeviceUnicast(unicasts...)
 
@@ -73,5 +72,5 @@ func GoNetSim() {
 	defer stop()
 
 	<-ctx.Done()
-	fmt.Println("Shutdown app")
+	log.Println("Shutdown app")
 }

@@ -9,6 +9,7 @@ import (
 )
 
 func Test_DeviceListen_MatchingIP(t *testing.T) {
+	t.Parallel()
 	expectedMAC := "AA:BB:CC:DD:EE:FF"
 
 	switchChan := make(chan string, 1) // buffered to prevent blocking
@@ -30,6 +31,7 @@ func Test_DeviceListen_MatchingIP(t *testing.T) {
 }
 
 func Test_DeviceListen_NonMatchingIP(t *testing.T) {
+	t.Parallel()
 	expectedEmptyMAC := ""
 	switchChan := make(chan string, 1)
 	d := garp.NewDevice("TestDevice", "192.168.1.10", "AA:BB:CC:DD:EE:FF", switchChan)

@@ -9,6 +9,8 @@ import (
 )
 
 func Test_NewRouter_MissingBroadcast(t *testing.T) {
+	t.Parallel()
+
 	listen := make(chan string)
 	ipList := []string{"192.168.1.10"}
 
@@ -19,6 +21,8 @@ func Test_NewRouter_MissingBroadcast(t *testing.T) {
 }
 
 func Test_NewRouter_MissingIpList(t *testing.T) {
+	t.Parallel()
+
 	listen := make(chan string)
 	broadcast := make(chan string)
 	router, err := garp.NewRouter([]string{}, broadcast, listen, 0)
@@ -28,6 +32,8 @@ func Test_NewRouter_MissingIpList(t *testing.T) {
 }
 
 func Test_SendArp_FoundMAC(t *testing.T) {
+	t.Parallel()
+
 	listen := make(chan string)
 	broadcast := make(chan string)
 	ipList := []string{"192.168.1.10", "192.168.1.1"}
