@@ -12,16 +12,14 @@ func main() {
 	serviceC := make(chan string)
 
 	// Start 3 log producers
-	go fanin.LogProducer("ServiceA", serviceA)
-	go fanin.LogProducer("ServiceB", serviceB)
-	go fanin.LogProducer("ServiceC", serviceC)
+	go fanin.LogProducer("Service A", serviceA)
+	go fanin.LogProducer("Service B", serviceB)
+	go fanin.LogProducer("Service C", serviceC)
 
 	// Fan-in their output
 	combined := fanin.MergeChanel(serviceA, serviceB, serviceC)
 
-	// Read 9 log entries (3 per service)
-	for range 9 {
-		srvLog := <-combined
-		log.Println("[INFO]", srvLog)
+	for msg := range combined {
+		log.Println("[INFO]", msg)
 	}
 }
