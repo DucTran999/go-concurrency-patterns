@@ -1,7 +1,8 @@
-package fanin
+package main
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -37,4 +38,22 @@ func LogProducer(serviceName string, out chan<- string) {
 		time.Sleep(time.Millisecond * 300)
 	}
 	close(out)
+}
+
+func main() {
+	serviceA := make(chan string)
+	serviceB := make(chan string)
+	serviceC := make(chan string)
+
+	// Start 3 log producers
+	go LogProducer("Service A", serviceA)
+	go LogProducer("Service B", serviceB)
+	go LogProducer("Service C", serviceC)
+
+	// Fan-in their output
+	combined := MergeChanel(serviceA, serviceB, serviceC)
+
+	for msg := range combined {
+		log.Println("[INFO]", msg)
+	}
 }
