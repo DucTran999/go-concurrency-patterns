@@ -44,7 +44,6 @@ func (p *person) Chat() {
 	msgIndex := 0
 
 	for s := range p.secretChan {
-
 		// My turn to SEND
 		if sent%2 == 0 {
 			if msgIndex >= len(p.messages) {
