@@ -10,11 +10,11 @@ import (
 )
 
 func main() {
-	// Communication channels
+	// Setup communication channels
 	bobSentChan := make(chan string)
 	aliceSentChan := make(chan string)
 
-	// Create Bob and Alice with their messages
+	// Create participants
 	bob := privatechat.NewPerson(
 		"Bob",
 		[]string{
@@ -33,12 +33,13 @@ func main() {
 		aliceSentChan, bobSentChan, 1,
 	)
 
-	// Secret nonce generator
+	// Secret nonce generator with context
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	secretChan := privatechat.Generator(ctx)
 
-	// Fan-out the generated secrets to both Alice and Bob
+	// Start fan-out for secrets
 	go func() {
 		for secret := range secretChan {
 			bob.ReceiveSecret(secret)
@@ -46,8 +47,8 @@ func main() {
 		}
 	}()
 
-	// Start chatting
-	log.Println("[INFO] conversation start")
+	log.Println("[INFO] Conversation started.")
+
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -61,9 +62,13 @@ func main() {
 		alice.Chat()
 	}()
 
+	// Wait for both to finish
 	wg.Wait()
 
-	cancel()                           // signal to stop secret generator if it's still running
-	time.Sleep(100 * time.Millisecond) // Give time for graceful closing
-	log.Println("[INFO] conversation ended.")
+	// Cancel the generator context
+	cancel()
+
+	// Wait for generator stop
+	time.Sleep(time.Millisecond * 100)
+	log.Println("[INFO] Conversation ended.")
 }
