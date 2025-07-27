@@ -1,7 +1,8 @@
-package generator
+package privatechat
 
 import (
 	"log"
+	"time"
 
 	"github.com/DucTran999/shared-pkg/scrypto/caesar"
 )
@@ -11,44 +12,66 @@ type person struct {
 
 	sendChan     chan string // Channel used by the person to send messages
 	receivedChan chan string // Channel used by the person to receive messages
-	SecretChan   chan int    // Channel through which the person receives the nonce (secret value) from a generator
+	secretChan   chan int    // Channel through which the person receives the nonce (secret value) from a generator
 
 	turn     int      // Indicates the person's turn in a communication or protocol sequence
 	messages []string // Stores messages sent by the person
 }
 
 func NewPerson(
-	name string, messages []string, sendChan, receivedChan chan string, turn int,
+	name string,
+	messages []string,
+	sendChan chan string,
+	receivedChan chan string,
+	turn int,
 ) *person {
 	return &person{
 		name:         name,
 		messages:     messages,
 		sendChan:     sendChan,
 		receivedChan: receivedChan,
-		SecretChan:   make(chan int),
+		secretChan:   make(chan int),
 		turn:         turn,
 	}
+}
+
+func (p *person) ReceiveSecret(secret int) {
+	p.secretChan <- secret
 }
 
 func (p *person) Chat() {
 	sent := p.turn
 	msgIndex := 0
 
-	for nonce := range p.SecretChan {
-		if sent%2 == 0 { // my turn to SEND
+	for s := range p.secretChan {
+		// My turn to SEND
+		if sent%2 == 0 {
 			if msgIndex >= len(p.messages) {
 				log.Printf("%s: all messages sent - closing chat", p.name)
-				close(p.sendChan)
+				close(p.sendChan) // Notify other party
 				return
 			}
-			p.sendChan <- caesar.CaesarEncrypt(p.messages[msgIndex], nonce)
+
+			cipher := caesar.CaesarEncrypt(p.messages[msgIndex], s)
+			p.sendChan <- cipher
 			msgIndex++
-		} else { // my turn to RECEIVE
-			cipher := <-p.receivedChan
+			time.Sleep(time.Second)
+		} else {
+			// My turn to RECEIVE
+			cipher, ok := <-p.receivedChan
+			if !ok {
+				log.Printf("%s: receive channel closed - ending chat", p.name)
+				return
+			}
+
 			log.Printf("%s got cipher: %q", p.name, cipher)
-			log.Printf("%s received message: %q", p.name, caesar.CaesarDecrypt(cipher, nonce))
+
+			// Decrypt the received message
+			plain := caesar.CaesarDecrypt(cipher, s)
+			log.Printf("%s received message: %q", p.name, plain)
 			log.Println("---------------------------------------------------------")
 		}
+
 		sent++
 	}
 }
